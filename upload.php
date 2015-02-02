@@ -1,4 +1,11 @@
 <?php
+is_callable('shell_exec') && false === stripos(ini_get('disable_functions'), 'shell_exec');
+function isEnabled($func) {
+    return is_callable($func) && false === stripos(ini_get('disable_functions'), $func);
+}
+
+
+
 $target_dir = "/tmp/";
 $target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
 $uploadOk = 1;
@@ -37,7 +44,15 @@ if ($uploadOk == 0) {
 // if everything is ok, try to upload file
 } else {
     if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
-        echo "The file ". basename( $_FILES["fileToUpload"]["name"]). " has been uploaded.";
+        //echo "The file ". basename( $_FILES["fileToUpload"]["name"]). " has been uploaded.";
+	if (isEnabled('shell_exec')) {
+    		//echo "works";
+		shell_exec('echo "hello world"');
+	}	
+	$str = "tesseract ".$target_file." /tmp/output";
+	echo $str;
+	$output = shell_exec($str);
+	echo $output;
     } else {
         echo "Sorry, there was an error uploading your file.";
     }
