@@ -17,7 +17,7 @@ if($imageFileType == "pdf")
     // convert pdf to set of images
     //$set_of_images = array();
     $set_of_images = pdf_convert($_FILES["fileToUpload"]["tmp_name"],$_FILES["fileToUpload"]["name"]);
-    $out = fopen("uploads/".$output_file_name.'.txt', "a+");
+    $out = fopen($output_file_name.'.txt', "a");
     for($i=0; $i<count($set_of_images);$i++)
     {
         $str = "tesseract ".$set_of_images[$i]." uploads/output_".$_FILES["fileToUpload"]["name"]."_".$i;
@@ -25,13 +25,13 @@ if($imageFileType == "pdf")
         
     }
     $files = glob("uploads/*.txt*");
-    print_r($files);
+    //print_r($files);
     foreach($files as $file){
         $in = fopen($file, "r");
-            while ($line = fread($in,filesize($file))){
+            while (($line = fgets($in)) !== false) {
                    fwrite($out, $line);
             }
-            fclose($in);
+        fclose($in);
         }
     fclose($out);
 
@@ -84,7 +84,7 @@ else
     	}
     	
     	$str = "tesseract ".$target_file." ".$output_file_name;
-    	echo $str;
+    	//echo $str;
     	$output = shell_exec($str);
     	#echo $output;
     	echo "<br><br>Click here to download file: <a href='".$output_file_name.".txt' download='".$output_file_name.".txt'>Download</a>";
@@ -100,21 +100,6 @@ function pdf_convert($pdf,$filename)
         //$pdf = $pdf.'pdf';
         $pdf_in = fopen($pdf, "rb");
         $img_array = array();
-        /*
-        $im = new imagick();
-        $im->setResolution(150,150);
-        $im->readImageBlob($pdf_in);
-        $num_pages = $im->getNumberImages();
-        echo "num pages ".$num_pages;
-        for($i = 0;$i < $num_pages; $i++) 
-        {
-            $im->setIteratorIndex($i);
-            $im->setImageFormat('jpeg');
-            $img_array[$i] = $im->getImageBlob();
-            echo $img_array[$i];
-         }
-         $im->destroy();
-        */
          // try for first page
          //$img_array = array();
          $num_pages = preg_replace('/[^0-9]/','',shell_exec("pdfinfo ".$pdf." | grep Pages:"));
